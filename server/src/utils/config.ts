@@ -19,7 +19,9 @@ const schema = z.object({
   FRONTEND_ORIGIN: z.string().default('http://localhost:5173'),
   PORT: z.coerce.number().default(4000),
   IMAP_ACCOUNTS_JSON: z.string().default('[]'),
-  KB_VECTOR_INDEX: z.string().default('kb_embedding_index')
+  KB_VECTOR_INDEX: z.string().default('kb_embedding_index'),
+  LOG_LEVEL: z.string().default('info'),
+  IMAPFLOW_LOG: z.string().default('none')
 });
 
 const parsed = schema.parse(process.env);
@@ -33,7 +35,9 @@ export const env = {
   FRONTEND_ORIGIN: parsed.FRONTEND_ORIGIN,
   PORT: parsed.PORT,
   IMAP_ACCOUNTS: JSON.parse(parsed.IMAP_ACCOUNTS_JSON) as z.infer<typeof ImapAccount>[],
-  KB_VECTOR_INDEX: parsed.KB_VECTOR_INDEX
+  KB_VECTOR_INDEX: parsed.KB_VECTOR_INDEX,
+  LOG_LEVEL: parsed.LOG_LEVEL,
+  IMAPFLOW_LOG: parsed.IMAPFLOW_LOG
 };
 
 export type ImapAccountConfig = z.infer<typeof ImapAccount>;

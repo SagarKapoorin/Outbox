@@ -1,7 +1,7 @@
 import { ImapFlow, type ImapFlowOptions } from 'imapflow';
 import { simpleParser } from 'mailparser';
 import pino from 'pino';
-import { type ImapAccountConfig } from '../utils/config.js';
+import { env, type ImapAccountConfig } from '../utils/config.js';
 import { EmailModel } from '../models/email.js';
 import { es, EMAIL_INDEX } from '../utils/elasticsearch.js';
 import { categorizeEmail } from '../ai/categorize.js';
@@ -29,11 +29,20 @@ export class ImapManager {
   }
 
   private async connectAccount(acc: ImapAccountConfig) {
+    const imapLogger = (() => {
+      const lvl = (env.IMAPFLOW_LOG || 'none').toLowerCase();
+      if (['none', 'false', 'off'].includes(lvl)) return false as any;
+      const child = this.log.child({ src: 'imapflow' });
+      child.level = lvl;
+      return child as any;
+    })();
+
     const client = new ImapFlow({
       host: acc.host,
       port: acc.port,
       secure: acc.secure,
-      auth: { user: acc.user, pass: acc.pass }
+      auth: { user: acc.user, pass: acc.pass },
+      logger: imapLogger
     } as ImapFlowOptions);
     // console.log('Connecting IMAP account:', acc.id);
     this.clients.set(acc.id, client);
@@ -102,14 +111,19 @@ export class ImapManager {
       if (label) {
         await EmailModel.updateOne({ id }, { $addToSet: { labels: label } });
         await es.update({ index: EMAIL_INDEX, id, doc: { labels: [label] } });
+        this.log.info({ id, label }, 'email labeled');
         if (label === 'Interested') {
-          await notifyInterested({ id, subject: doc.subject, from: doc.from });
-          await triggerInterestedWebhook({ id, subject: doc.subject, from: doc.from });
+          try {
+            await notifyInterested({ id, subject: doc.subject, from: doc.from });
+            await triggerInterestedWebhook({ id, subject: doc.subject, from: doc.from });
+            this.log.info({ id }, 'interested notifications sent');
+          } catch (notifyErr) {
+            this.log.warn({ err: notifyErr as any, id }, 'notification failed');
+          }
         }
       }
-      // console.log('Categorized email', { id, label });
     } catch (e) {
-      this.log.warn({ err: e, id }, 'categorization failed');
+      this.log.warn({ err: e as any, id }, 'categorization failed');
     }
   }
 }

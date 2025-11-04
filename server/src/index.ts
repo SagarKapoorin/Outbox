@@ -9,7 +9,7 @@ import { ImapManager } from './imap/imapManager.js';
 import emailsRouter from './routes/emails.js';
 import accountsRouter from './routes/accounts.js';
 
-const log = pino({ name: 'onebox' });
+const log = pino({ name: 'onebox', level: env.LOG_LEVEL, base: undefined });
 
 async function main() {
   const app = express();
