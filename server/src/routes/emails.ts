@@ -48,6 +48,28 @@ router.post('/:id/label', async (req, res) => {
   res.json(updated);
 });
 
+router.delete('/:id/label', async (req, res) => {
+  const id = req.params.id;
+  const { label } = req.body as { label: string };
+  if (!label) return res.status(400).json({ error: 'label required' });
+
+  const existing = await EmailModel.findOne({ id }).lean();
+  if (!existing) return res.status(404).json({ error: 'Not Found' });
+
+  const currentLabels: string[] = Array.isArray(existing.labels) ? existing.labels : [];
+  if (!currentLabels.includes(label)) return res.status(400).json({ error: 'label not set' });
+  if (currentLabels.length <= 1) return res.status(400).json({ error: 'at least one label required' });
+
+  const newLabels = currentLabels.filter((l) => l !== label);
+  const updated = await EmailModel.findOneAndUpdate(
+    { id },
+    { $set: { labels: newLabels } },
+    { new: true }
+  );
+  await es.update({ index: EMAIL_INDEX, id, doc: { labels: newLabels } });
+  res.json(updated);
+});
+
 router.post('/:id/suggest-reply', async (req, res) => {
   const id = req.params.id;
   const doc = await EmailModel.findOne({ id }).lean();
