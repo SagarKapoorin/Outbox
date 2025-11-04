@@ -16,3 +16,4 @@ web/dist/
 
 # Docker volumes (not tracked)
 .docker/
+.env
