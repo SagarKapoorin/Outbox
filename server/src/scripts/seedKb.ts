@@ -7,7 +7,6 @@ import { embed, KBModel } from '../ai/rag.js';
 import { KB_TEXT } from '../seed/kbText.js';
 
 const log = pino();
-
 async function main() {
   await connectMongo(log);
   const args = process.argv.slice(2);
@@ -15,10 +14,8 @@ async function main() {
     const idx = args.indexOf(`--${name}`);
     return idx !== -1 ? args[idx + 1] : undefined;
   };
-
   let text: string;
   const directText = getArg('text') || process.env.KB_TEXT;
-
   if ((KB_TEXT || '').trim().length > 0) {
     text = KB_TEXT;
     log.info('Seeding KB from embedded constant');

@@ -10,23 +10,23 @@ const LABELS = ['Interested', 'Meeting Booked', 'Not Interested', 'Spam', 'Out o
 function App() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
-
+  // console.log(folders);
   const [selectedAccount, setSelectedAccount] = useState<string | undefined>();
   const [selectedFolder, setSelectedFolder] = useState<string | undefined>('INBOX');
   const [labelFilter, setLabelFilter] = useState<string>('');
   const [query, setQuery] = useState('');
-
+// console.log("Selected Folder: "+selectedFolder+" "+query+" "+labelFilter);
   const [emails, setEmails] = useState<EmailItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page] = useState(0);
   const [size] = useState(25);
-
+  // console.log("Emails: "+emails.length);
   const [selectedId, setSelectedId] = useState<string | undefined>();
-  const [selectedEmail, setSelectedEmail] = useState<EmailItem | null>();
-  const [suggest, setSuggest] = useState<string>('');
+     const [selectedEmail, setSelectedEmail] = useState<EmailItem | null>();
+const [suggest, setSuggest] = useState<string>('');
   const [loadingSuggest, setLoadingSuggest] = useState(false);
-
+// console.log("Selected Email: "+selectedEmail?.id);
   useEffect(() => {
     api.getAccounts().then(setAccounts).catch(() => setAccounts([]));
     api.getFolders().then(setFolders).catch(() => setFolders([{ id: 'INBOX', name: 'INBOX' }]));
@@ -41,7 +41,6 @@ function App() {
       .then((r) => {
         setEmails(r.items);
         setTotal(r.total);
-        // preserve selection if still present, else select first
         const still = r.items.find((e) => e.id === selectedId);
         const first = r.items[0];
         if (!still) {
@@ -55,10 +54,11 @@ function App() {
       })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [query, selectedAccount, selectedFolder, labelFilter, page, size]);
+  }, [query, selectedAccount, selectedFolder, labelFilter, page, size,selectedId]);
 
   const onSelectEmail = async (id: string) => {
     setSelectedId(id);
+    // console.log("Selected Email ID: "+id);
     setSuggest('');
     try {
       const e = await api.getEmail(id);
@@ -68,11 +68,11 @@ function App() {
       setSelectedEmail(fallback);
     }
   };
-
   const markInterested = async (id: string) => {
     try {
       const updated = await api.setLabel(id, 'Interested');
       setSelectedEmail(updated);
+      // console.log("Marking Interested for email id: "+id);
       setEmails((prev) => prev.map((e) => (e.id === id ? { ...e, labels: Array.from(new Set([...(e.labels || []), 'Interested'])) } : e)));
     } catch (e) {
       console.error(e);
@@ -91,7 +91,7 @@ function App() {
     }
   };
 
-  const removeLabel = async (id: string, label: string) => {
+     const removeLabel = async (id: string, label: string) => {
     const current = (selectedEmail?.id === id ? selectedEmail?.labels : emails.find((e) => e.id === id)?.labels) || [];
     if (current.length <= 1) {
       alert('At least one label is required.');
@@ -108,7 +108,7 @@ function App() {
     }
   };
 
-  const suggestReply = async (id: string) => {
+      const suggestReply = async (id: string) => {
     setLoadingSuggest(true);
     setSuggest('');
     try {
@@ -149,9 +149,9 @@ function App() {
       <header className="topbar">
         <div className="brand">Onebox</div>
         {headerRight}
-      </header>
+         </header>
       <div className="content">
-        <Sidebar
+              <Sidebar
           accounts={accounts}
           folders={folders}
           selectedAccountId={selectedAccount}
@@ -159,7 +159,7 @@ function App() {
           selectedFolderId={selectedFolder}
           onSelectFolder={setSelectedFolder}
         />
-        <main className="main">
+              <main className="main">
           <div className="columns">
             <div className="col list">
               <EmailList items={emails} loading={loading} selectedId={selectedId} onSelect={onSelectEmail} total={total} />
@@ -175,7 +175,7 @@ function App() {
                 loadingSuggest={loadingSuggest}
               />
             </div>
-          </div>
+               </div>
         </main>
       </div>
     </div>

@@ -6,7 +6,6 @@ interface KBDoc extends mongoose.Document {
   text: string;
   embedding: number[];
 }
-
 const KBSchema = new Schema<KBDoc>({
   text: { type: String, required: true },
   embedding: { type: [Number], required: true }
@@ -15,16 +14,14 @@ const KBSchema = new Schema<KBDoc>({
 export const KBModel = mongoose.model<KBDoc>('KB', KBSchema);
 
 let client: OpenAI | null = null;
-function getClient() {
+      function getClient() {
   if (!client) client = new OpenAI({ apiKey: env.OPENAI_API_KEY });
   return client;
 }
-
 export async function embed(text: string) {
   const res = await getClient().embeddings.create({ model: 'text-embedding-3-small', input: text });
   return res.data[0].embedding as number[];
 }
-
 export async function suggestReply(contextText: string, email: { subject?: string; body?: string }) {
   const emailVec = await embed(contextText + '\n' + (email.body || ''));
   const results: Array<{ _id: any; text: string; score: number }> = await KBModel.aggregate([

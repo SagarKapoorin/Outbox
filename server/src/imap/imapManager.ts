@@ -14,7 +14,7 @@ function sinceDate(days = 30) {
   return d;
 }
 
-export class ImapManager {
+      export class ImapManager {
   private accounts: ImapAccountConfig[];
   private log: pino.Logger;
   private clients = new Map<string, ImapFlow>();
@@ -128,7 +128,7 @@ export class ImapManager {
   }
 }
 
-function addressText(a: any): string {
+    function addressText(a: any): string {
   if (!a) return '';
   if (Array.isArray(a)) return a.map(addressText).filter(Boolean).join(', ');
   if (typeof a.text === 'string') return a.text;

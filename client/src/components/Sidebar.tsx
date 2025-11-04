@@ -19,7 +19,7 @@ export function Sidebar({
 }) {
   return (
     <aside className="sidebar">
-      <div className="section">
+              <div className="section">
         <div className="section-title">Accounts</div>
         <button
           className={`pill ${!selectedAccountId ? 'active' : ''}`}
@@ -27,7 +27,7 @@ export function Sidebar({
         >
           All
         </button>
-        {accounts.map((a) => (
+{accounts.map((a) => (
           <button
             key={a.id}
             className={`pill ${selectedAccountId === a.id ? 'active' : ''}`}
@@ -46,7 +46,7 @@ export function Sidebar({
         >
           All
         </button>
-        {folders.map((f) => (
+                {folders.map((f) => (
           <button
             key={f.id}
             className={`pill ${selectedFolderId === f.id ? 'active' : ''}`}

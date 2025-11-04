@@ -10,7 +10,7 @@ function getClient() {
   return client;
 }
 
-export async function categorizeEmail(subject: string, body: string): Promise<Label | null> {
+        export async function categorizeEmail(subject: string, body: string): Promise<Label | null> {
   if (!env.OPENAI_API_KEY) return null;
   const prompt = `You are a strict email classifier. Choose one label exactly from the set: ${LABELS.join(
     ', '

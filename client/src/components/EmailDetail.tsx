@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { EmailItem } from '../api';
 
-export function EmailDetail({
+  export function EmailDetail({
   email,
   onMarkInterested,
   onAddLabel,
@@ -19,17 +19,16 @@ export function EmailDetail({
   loadingSuggest: boolean;
 }) {
   const [showBody, setShowBody] = useState(true);
-
   if (!email) {
     return <div className="email-detail empty">Select an email to view details.</div>;
   }
-
+  // console.log(email);
   const labels = email.labels || [];
-
+  // console.log(labels);
   return (
     <div className="email-detail">
       <div className="detail-header">
-        <div className="subject-large">{email.subject || '(no subject)'}</div>
+           <div className="subject-large">{email.subject || '(no subject)'}</div>
         <div className="actions">
           <button
             className="btn"
@@ -39,17 +38,17 @@ export function EmailDetail({
           >
             Mark Interested
           </button>
-          <button className="btn" onClick={() => onSuggestReply(email.id)} disabled={loadingSuggest}>
+    <button className="btn" onClick={() => onSuggestReply(email.id)} disabled={loadingSuggest}>
             {loadingSuggest ? 'Suggesting…' : 'Suggest Reply'}
           </button>
         </div>
       </div>
-      <div className="meta">
-        <div><strong>From:</strong> {email.from || ''}</div>
+          <div className="meta">
+                 <div><strong>From:</strong> {email.from || ''}</div>
         <div><strong>To:</strong> {email.to || ''}</div>
         <div><strong>Date:</strong> {email.date ? new Date(email.date).toLocaleString() : ''}</div>
       </div>
-      <div className="labels">
+<div className="labels">
         {labels.map((l) => (
           <span key={l} className={`badge badge-${l.replace(/\s+/g, '').toLowerCase()}`}>
             {l}

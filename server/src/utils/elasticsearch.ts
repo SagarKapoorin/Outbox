@@ -3,10 +3,8 @@ import type pino from 'pino';
 import { env } from './config.js';
 
 export const es = new Client({ node: env.ELASTICSEARCH_NODE });
-
 export const EMAIL_INDEX = 'emails';
-
-export async function initElasticsearch(log: pino.Logger) {
+    export async function initElasticsearch(log: pino.Logger) {
   // console.log("hit init es")
   const exists = await es.indices
     .exists({ index: EMAIL_INDEX })
@@ -37,7 +35,7 @@ export async function initElasticsearch(log: pino.Logger) {
           labels: { type: 'keyword' }
         }
       }
-      
+
     });
     log.info('Elasticsearch index created');
   }
