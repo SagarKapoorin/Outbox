@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import type { EmailItem } from '../api';
 
-  export function EmailDetail({
+export function EmailDetail({
   email,
-  onMarkInterested,
   onAddLabel,
   onRemoveLabel,
   onSuggestReply,
@@ -11,7 +10,6 @@ import type { EmailItem } from '../api';
   loadingSuggest,
 }: {
   email?: EmailItem | null;
-  onMarkInterested: (id: string) => Promise<void> | void;
   onAddLabel: (id: string, label: string) => Promise<void> | void;
   onRemoveLabel: (id: string, label: string) => Promise<void> | void;
   onSuggestReply: (id: string) => Promise<void> | void;
@@ -30,15 +28,7 @@ import type { EmailItem } from '../api';
       <div className="detail-header">
            <div className="subject-large">{email.subject || '(no subject)'}</div>
         <div className="actions">
-          <button
-            className="btn"
-            onClick={() => onMarkInterested(email.id)}
-            disabled={labels.includes('Interested')}
-            title={labels.includes('Interested') ? 'Already marked' : 'Mark as Interested'}
-          >
-            Mark Interested
-          </button>
-    <button className="btn" onClick={() => onSuggestReply(email.id)} disabled={loadingSuggest}>
+          <button className="btn" onClick={() => onSuggestReply(email.id)} disabled={loadingSuggest}>
             {loadingSuggest ? 'Suggesting…' : 'Suggest Reply'}
           </button>
         </div>

@@ -9,10 +9,7 @@ const LABELS = ['Interested', 'Meeting Booked', 'Not Interested', 'Spam', 'Out o
 
 function App() {
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
-  // console.log(folders);
   const [selectedAccount, setSelectedAccount] = useState<string | undefined>();
-  const [selectedFolder, setSelectedFolder] = useState<string | undefined>('INBOX');
   const [labelFilter, setLabelFilter] = useState<string>('');
   const [query, setQuery] = useState('');
 // console.log("Selected Folder: "+selectedFolder+" "+query+" "+labelFilter);
@@ -29,15 +26,15 @@ const [suggest, setSuggest] = useState<string>('');
 // console.log("Selected Email: "+selectedEmail?.id);
   useEffect(() => {
     api.getAccounts().then(setAccounts).catch(() => setAccounts([]));
-    api.getFolders().then(setFolders).catch(() => setFolders([{ id: 'INBOX', name: 'INBOX' }]));
   }, []);
 
   useEffect(() => {
     const ctrl = new AbortController();
+    console.log('searching...', { q: query, account: selectedAccount, label: labelFilter });
     setLoading(true);
     setSuggest('');
     api
-      .searchEmails({ q: query, account: selectedAccount, folder: selectedFolder, label: labelFilter, page, size })
+      .searchEmails({   q: query , account: selectedAccount , label: labelFilter, page, size })
       .then((r) => {
         setEmails(r.items);
         setTotal(r.total);
@@ -54,7 +51,7 @@ const [suggest, setSuggest] = useState<string>('');
       })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [query, selectedAccount, selectedFolder, labelFilter, page, size,selectedId]);
+  }, [query, selectedAccount, labelFilter, page, size,selectedId]);
 
   const onSelectEmail = async (id: string) => {
     setSelectedId(id);
@@ -68,30 +65,20 @@ const [suggest, setSuggest] = useState<string>('');
       setSelectedEmail(fallback);
     }
   };
-  const markInterested = async (id: string) => {
-    try {
-      const updated = await api.setLabel(id, 'Interested');
-      setSelectedEmail(updated);
-      // console.log("Marking Interested for email id: "+id);
-      setEmails((prev) => prev.map((e) => (e.id === id ? { ...e, labels: Array.from(new Set([...(e.labels || []), 'Interested'])) } : e)));
-    } catch (e) {
-      console.error(e);
-      alert('Failed to label email.');
-    }
-  };
 
   const addLabel = async (id: string, label: string) => {
     try {
       const updated = await api.setLabel(id, label);
       setSelectedEmail(updated);
-      setEmails((prev) => prev.map((e) => (e.id === id ? { ...e, labels: Array.from(new Set([...(e.labels || []), label])) } : e)));
+      console.log('label +', label, id)
+      setEmails((prev) => prev.map((e) => (e.id === id ? { ...e, labels: (updated.labels || []) } : e)));
     } catch (e) {
       console.error(e);
       alert('Failed to add label.');
     }
   };
 
-     const removeLabel = async (id: string, label: string) => {
+  const removeLabel = async (id: string, label: string) => {
     const current = (selectedEmail?.id === id ? selectedEmail?.labels : emails.find((e) => e.id === id)?.labels) || [];
     if (current.length <= 1) {
       alert('At least one label is required.');
@@ -101,6 +88,7 @@ const [suggest, setSuggest] = useState<string>('');
       // Best-effort: expects backend DELETE /emails/:id/label
       const updated = await api.removeLabel(id, label);
       setSelectedEmail(updated);
+      console.log('label -', label, id)
       setEmails((prev) => prev.map((e) => (e.id === id ? { ...e, labels: (updated.labels || []) } : e)));
     } catch (e) {
       console.error(e);
@@ -151,13 +139,10 @@ const [suggest, setSuggest] = useState<string>('');
         {headerRight}
          </header>
       <div className="content">
-              <Sidebar
+        <Sidebar
           accounts={accounts}
-          folders={folders}
           selectedAccountId={selectedAccount}
           onSelectAccount={setSelectedAccount}
-          selectedFolderId={selectedFolder}
-          onSelectFolder={setSelectedFolder}
         />
               <main className="main">
           <div className="columns">
@@ -167,7 +152,6 @@ const [suggest, setSuggest] = useState<string>('');
             <div className="col detail">
               <EmailDetail
                 email={selectedEmail}
-                onMarkInterested={markInterested}
                 onAddLabel={addLabel}
                 onRemoveLabel={removeLabel}
                 onSuggestReply={suggestReply}

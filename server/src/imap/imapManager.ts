@@ -109,8 +109,14 @@ function sinceDate(days = 30) {
     try {
       const label = await categorizeEmail(doc.subject, doc.text);
       if (label) {
-        await EmailModel.updateOne({ id }, { $addToSet: { labels: label } });
-        await es.update({ index: EMAIL_INDEX, id, doc: { labels: [label] } });
+        const opposite = label === 'Interested' ? 'Not Interested' : label === 'Not Interested' ? 'Interested' : null;
+        const updateQuery: any = { $addToSet: { labels: label } };
+        if (opposite) updateQuery.$pull = { labels: opposite };
+
+        await EmailModel.updateOne({ id }, updateQuery);
+        const updatedDoc = await EmailModel.findOne({ id }).lean();
+        const labels = Array.isArray(updatedDoc?.labels) ? updatedDoc!.labels : [label];
+        await es.update({ index: EMAIL_INDEX, id, doc: { labels } });
         // this.log.info({ id, label }, 'email labeled');
         if (label === 'Interested') {
           try {

@@ -1,21 +1,13 @@
 import type { Account } from '../api';
 
-type Folder = { id: string; name: string };
-
 export function Sidebar({
   accounts,
-  folders,
   selectedAccountId,
   onSelectAccount,
-  selectedFolderId,
-  onSelectFolder,
 }: {
   accounts: Account[];
-  folders: Folder[];
   selectedAccountId?: string;
   onSelectAccount: (id?: string) => void;
-  selectedFolderId?: string;
-  onSelectFolder: (id?: string) => void;
 }) {
   return (
     <aside className="sidebar">
@@ -38,25 +30,6 @@ export function Sidebar({
           </button>
         ))}
       </div>
-      <div className="section">
-        <div className="section-title">Folders</div>
-        <button
-          className={`pill ${!selectedFolderId ? 'active' : ''}`}
-          onClick={() => onSelectFolder(undefined)}
-        >
-          All
-        </button>
-                {folders.map((f) => (
-          <button
-            key={f.id}
-            className={`pill ${selectedFolderId === f.id ? 'active' : ''}`}
-            onClick={() => onSelectFolder(f.id)}
-          >
-            {f.name}
-          </button>
-        ))}
-      </div>
     </aside>
   );
 }
-
