@@ -21,7 +21,10 @@ const schema = z.object({
   IMAP_ACCOUNTS_JSON: z.string().default('[]'),
   KB_VECTOR_INDEX: z.string().default('kb_embedding_index'),
   LOG_LEVEL: z.string().default('info'),
-  IMAPFLOW_LOG: z.string().default('none')
+  IMAPFLOW_LOG: z.string().default('none'),
+  REDIS_URL: z.string().default('redis://localhost:6379'),
+  RATE_LIMIT_WINDOW_SEC: z.coerce.number().default(60),
+  RATE_LIMIT_MAX: z.coerce.number().default(300)
 });
 
 const parsed = schema.parse(process.env);
@@ -37,7 +40,10 @@ export const env = {
   IMAP_ACCOUNTS: JSON.parse(parsed.IMAP_ACCOUNTS_JSON) as z.infer<typeof ImapAccount>[],
   KB_VECTOR_INDEX: parsed.KB_VECTOR_INDEX,
   LOG_LEVEL: parsed.LOG_LEVEL,
-  IMAPFLOW_LOG: parsed.IMAPFLOW_LOG
+  IMAPFLOW_LOG: parsed.IMAPFLOW_LOG,
+  REDIS_URL: parsed.REDIS_URL,
+  RATE_LIMIT_WINDOW_SEC: parsed.RATE_LIMIT_WINDOW_SEC,
+  RATE_LIMIT_MAX: parsed.RATE_LIMIT_MAX
 };
 
 export type ImapAccountConfig = z.infer<typeof ImapAccount>;

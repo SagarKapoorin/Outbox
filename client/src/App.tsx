@@ -4,6 +4,8 @@ import { api, type Account, type EmailItem } from './api';
 import { Sidebar } from './components/Sidebar';
 import { EmailList } from './components/EmailList';
 import { EmailDetail } from './components/EmailDetail';
+import { useDebounce } from './hooks/useDebounce';
+import { Pagination } from './components/Pagination';
 
 const LABELS = ['Interested', 'Meeting Booked', 'Not Interested', 'Spam', 'Out of Office'] as const;
 
@@ -12,12 +14,13 @@ function App() {
   const [selectedAccount, setSelectedAccount] = useState<string | undefined>();
   const [labelFilter, setLabelFilter] = useState<string>('');
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 400);
 // console.log("Selected Folder: "+selectedFolder+" "+query+" "+labelFilter);
   const [emails, setEmails] = useState<EmailItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [page] = useState(0);
-  const [size] = useState(25);
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(25);
   // console.log("Emails: "+emails.length);
   const [selectedId, setSelectedId] = useState<string | undefined>();
      const [selectedEmail, setSelectedEmail] = useState<EmailItem | null>();
@@ -30,11 +33,11 @@ const [suggest, setSuggest] = useState<string>('');
 
   useEffect(() => {
     const ctrl = new AbortController();
-    console.log('searching...', { q: query, account: selectedAccount, label: labelFilter });
+    console.log('searching...', { q: debouncedQuery, account: selectedAccount, label: labelFilter });
     setLoading(true);
     setSuggest('');
     api
-      .searchEmails({   q: query , account: selectedAccount , label: labelFilter, page, size })
+      .searchEmails({   q: debouncedQuery , account: selectedAccount , label: labelFilter, page, size })
       .then((r) => {
         setEmails(r.items);
         setTotal(r.total);
@@ -51,7 +54,11 @@ const [suggest, setSuggest] = useState<string>('');
       })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [query, selectedAccount, labelFilter, page, size,selectedId]);
+  }, [debouncedQuery, selectedAccount, labelFilter, page, size, selectedId]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedQuery, selectedAccount, labelFilter]);
 
   const onSelectEmail = async (id: string) => {
     setSelectedId(id);
@@ -85,7 +92,6 @@ const [suggest, setSuggest] = useState<string>('');
       return;
     }
     try {
-      // Best-effort: expects backend DELETE /emails/:id/label
       const updated = await api.removeLabel(id, label);
       setSelectedEmail(updated);
       console.log('label -', label, id)
@@ -147,6 +153,13 @@ const [suggest, setSuggest] = useState<string>('');
               <main className="main">
           <div className="columns">
             <div className="col list">
+              <Pagination
+                page={page}
+                size={size}
+                total={total}
+                onPageChange={setPage}
+                onSizeChange={(s) => { setSize(s); setPage(0); }}
+              />
               <EmailList items={emails} loading={loading} selectedId={selectedId} onSelect={onSelectEmail} total={total} />
             </div>
             <div className="col detail">
