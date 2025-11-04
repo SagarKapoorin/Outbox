@@ -42,13 +42,22 @@ router.post('/:id/label', async (req, res) => {
   const id = req.params.id;
   const { label } = req.body as { label: string };
   if (!label) return res.status(400).json({ error: 'label required' });
-  const opposite = label === 'Interested' ? 'Not Interested' : label === 'Not Interested' ? 'Interested' : null;
-  const updateQuery: any = { $addToSet: { labels: label } };
-  if (opposite) updateQuery.$pull = { labels: opposite };
+  const existing = await EmailModel.findOne({ id }).lean();
+  if (!existing) return res.status(404).json({ error: 'Not Found' });
 
-  const updated = await EmailModel.findOneAndUpdate({ id }, updateQuery, { new: true });
-  if (!updated) return res.status(404).json({ error: 'Not Found' });
-  await es.update({ index: EMAIL_INDEX, id, doc: { labels: updated.labels } });
+  const opposite = label === 'Interested' ? 'Not Interested' : label === 'Not Interested' ? 'Interested' : null;
+  const current: string[] = Array.isArray(existing.labels) ? existing.labels : [];
+  const next = new Set<string>(current);
+  if (opposite) next.delete(opposite);
+  next.add(label);
+
+  const finalLabels = Array.from(next);
+  const updated = await EmailModel.findOneAndUpdate(
+    { id },
+    { $set: { labels: finalLabels } },
+    { new: true }
+  );
+  await es.update({ index: EMAIL_INDEX, id, doc: { labels: finalLabels } });
   res.json(updated);
 });
 
