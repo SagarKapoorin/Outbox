@@ -239,6 +239,71 @@ body {
   background: var(--panel);
 }
 
+/* */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-status {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 6px 8px;
+  background: var(--panel);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border-light);
+}
+
+.btn-ghost:hover {
+  background: var(--panel-hover);
+  box-shadow: none;
+}
+
+.pagination-size {
+  min-width: 90px;
+}
+
+@media (max-width: 720px) {
+  .pagination {
+    gap: 8px;
+    padding: 8px 10px;
+    flex-wrap: wrap;
+  }
+  .pagination-right {
+    margin-left: auto;
+  }
+  .pagination-status {
+    display: none; /* hide status on very small screens */
+  }
+}
+
 .list-header {
   display: flex;
   justify-content: space-between;

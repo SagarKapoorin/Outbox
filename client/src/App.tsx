@@ -5,6 +5,7 @@ import { Sidebar } from './components/Sidebar';
 import { EmailList } from './components/EmailList';
 import { EmailDetail } from './components/EmailDetail';
 import { useDebounce } from './hooks/useDebounce';
+import { Pagination } from './components/Pagination';
 
 const LABELS = ['Interested', 'Meeting Booked', 'Not Interested', 'Spam', 'Out of Office'] as const;
 
@@ -18,8 +19,8 @@ function App() {
   const [emails, setEmails] = useState<EmailItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [page] = useState(0);
-  const [size] = useState(25);
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(25);
   // console.log("Emails: "+emails.length);
   const [selectedId, setSelectedId] = useState<string | undefined>();
      const [selectedEmail, setSelectedEmail] = useState<EmailItem | null>();
@@ -55,6 +56,10 @@ const [suggest, setSuggest] = useState<string>('');
     return () => ctrl.abort();
   }, [debouncedQuery, selectedAccount, labelFilter, page, size, selectedId]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedQuery, selectedAccount, labelFilter]);
+
   const onSelectEmail = async (id: string) => {
     setSelectedId(id);
     // console.log("Selected Email ID: "+id);
@@ -87,7 +92,6 @@ const [suggest, setSuggest] = useState<string>('');
       return;
     }
     try {
-      // Best-effort: expects backend DELETE /emails/:id/label
       const updated = await api.removeLabel(id, label);
       setSelectedEmail(updated);
       console.log('label -', label, id)
@@ -149,6 +153,13 @@ const [suggest, setSuggest] = useState<string>('');
               <main className="main">
           <div className="columns">
             <div className="col list">
+              <Pagination
+                page={page}
+                size={size}
+                total={total}
+                onPageChange={setPage}
+                onSizeChange={(s) => { setSize(s); setPage(0); }}
+              />
               <EmailList items={emails} loading={loading} selectedId={selectedId} onSelect={onSelectEmail} total={total} />
             </div>
             <div className="col detail">
