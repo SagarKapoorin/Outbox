@@ -2,12 +2,16 @@ import { Router } from 'express';
 import { es, EMAIL_INDEX } from '../utils/elasticsearch.js';
 import { EmailModel } from '../models/email.js';
 import { suggestReply } from '../ai/rag.js';
+import { cacheDel, cacheGet, cacheSet } from '../utils/redis.js';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
   // console.log("hitting email route")
   const { q, account, folder, from, to, label, page = '0', size = '25' } = req.query as Record<string, string>;
+  const listKey = `emails:list:${JSON.stringify({ q, account, folder, from, to, label, page: String(page), size: String(size) })}`;
+  const cached = await cacheGet<any>(listKey);
+  if (cached) return res.json(cached);
   const must: any[] = [];
   if (q) {
     must.push({ multi_match: { query: q, fields: ['subject^2', 'text', 'html'] } });
@@ -25,16 +29,23 @@ router.get('/', async (req, res) => {
   const query = must.length ? { bool: { must } } : { match_all: {} };
   const fromIdx = parseInt(page) * parseInt(size);
   const { hits } = await es.search({ index: EMAIL_INDEX, from: fromIdx, size: parseInt(size), body: { query } });
-  res.json({
+  const payload = {
     total: (hits.total as any)?.value ?? 0,
     items: (hits.hits as any[]).map((h) => ({ id: h._id, ...(h._source || {}) }))
-  });
+  };
+  await cacheSet(listKey, payload, 60); // 60s short TTL
+  res.json(payload);
 });
 
 router.get('/:id', async (req, res) => {
   const id = req.params.id;
+  const key = `email:${id}`;
+  const cached = await cacheGet<any>(key);
+  if (cached) return res.json(cached);
   const doc = await EmailModel.findOne({ id }).lean();
   if (!doc) return res.status(404).json({ error: 'Not Found' });
+  // 515 minutes = 30900 seconds
+  await cacheSet(key, doc, 30900);
   res.json(doc);
 });
 
@@ -58,6 +69,7 @@ router.post('/:id/label', async (req, res) => {
     { new: true }
   );
   await es.update({ index: EMAIL_INDEX, id, doc: { labels: finalLabels } });
+  await cacheDel(`email:${id}`);
   res.json(updated);
 });
 
@@ -80,6 +92,8 @@ router.delete('/:id/label', async (req, res) => {
     { new: true }
   );
   await es.update({ index: EMAIL_INDEX, id, doc: { labels: newLabels } });
+  // invalidate detail cache
+  await cacheDel(`email:${id}`);
   res.json(updated);
 });
 
