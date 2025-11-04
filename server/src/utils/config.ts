@@ -18,7 +18,8 @@ const schema = z.object({
   INTERESTED_WEBHOOK_URL: z.string().optional(),
   FRONTEND_ORIGIN: z.string().default('http://localhost:5173'),
   PORT: z.coerce.number().default(4000),
-  IMAP_ACCOUNTS_JSON: z.string().default('[]')
+  IMAP_ACCOUNTS_JSON: z.string().default('[]'),
+  KB_VECTOR_INDEX: z.string().default('kb_embedding_index')
 });
 
 const parsed = schema.parse(process.env);
@@ -31,7 +32,8 @@ export const env = {
   INTERESTED_WEBHOOK_URL: parsed.INTERESTED_WEBHOOK_URL,
   FRONTEND_ORIGIN: parsed.FRONTEND_ORIGIN,
   PORT: parsed.PORT,
-  IMAP_ACCOUNTS: JSON.parse(parsed.IMAP_ACCOUNTS_JSON) as z.infer<typeof ImapAccount>[]
+  IMAP_ACCOUNTS: JSON.parse(parsed.IMAP_ACCOUNTS_JSON) as z.infer<typeof ImapAccount>[],
+  KB_VECTOR_INDEX: parsed.KB_VECTOR_INDEX
 };
 
 export type ImapAccountConfig = z.infer<typeof ImapAccount>;
