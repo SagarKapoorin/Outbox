@@ -1,0 +1,53 @@
+{
+  "info": {
+    "name": "Onebox API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "port", "value": "3000" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+    },
+    {
+      "name": "List Emails",
+      "request": { "method": "GET", "url": "{{baseUrl}}/emails?q=offer" }
+    },
+    {
+      "name": "Get Email by ID",
+      "request": { "method": "GET", "url": "{{baseUrl}}/emails/{{id}}" }
+    },
+    {
+      "name": "Add Label",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/emails/{{id}}/label",
+        "body": { "mode": "raw", "raw": "{\n  \"label\": \"Interested\"\n}" }
+      }
+    },
+    {
+      "name": "Suggest Reply",
+      "request": { "method": "POST", "url": "{{baseUrl}}/emails/{{id}}/suggest-reply" }
+    },
+    {
+      "name": "Accounts",
+      "request": { "method": "GET", "url": "http://localhost:{{port}}/accounts" }
+    },
+    {
+      "name": "Accounts Folders",
+      "request": { "method": "GET", "url": "http://localhost:{{port}}/accounts/folders" }
+    },
+    {
+      "name": "Emails Filter: Account+Folder+Label",
+      "request": { "method": "GET", "url": "{{baseUrl}}/emails?account=acc1&folder=INBOX&label=Interested" }
+    },
+    {
+      "name": "Emails Filter: Date Range + Query",
+      "request": { "method": "GET", "url": "{{baseUrl}}/emails?from=2024-10-01&to=2024-10-31&q=pricing" }
+    }
+  ]
+}

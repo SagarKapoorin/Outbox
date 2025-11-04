@@ -1,0 +1,10 @@
+I am applying for a job position. If the lead is interested, share the meeting booking link: https://cal.com/example
+
+Our product helps teams automate email outreach and manage replies in one place.
+
+If a recipient is out of office, set a reminder to follow up after they return.
+
+If a meeting is booked, acknowledge it and confirm the calendar invite.
+
+For not interested responses, politely close the loop and thank them.
+
