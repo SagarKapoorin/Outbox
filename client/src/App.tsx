@@ -4,6 +4,7 @@ import { api, type Account, type EmailItem } from './api';
 import { Sidebar } from './components/Sidebar';
 import { EmailList } from './components/EmailList';
 import { EmailDetail } from './components/EmailDetail';
+import { useDebounce } from './hooks/useDebounce';
 
 const LABELS = ['Interested', 'Meeting Booked', 'Not Interested', 'Spam', 'Out of Office'] as const;
 
@@ -12,6 +13,7 @@ function App() {
   const [selectedAccount, setSelectedAccount] = useState<string | undefined>();
   const [labelFilter, setLabelFilter] = useState<string>('');
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 400);
 // console.log("Selected Folder: "+selectedFolder+" "+query+" "+labelFilter);
   const [emails, setEmails] = useState<EmailItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -30,11 +32,11 @@ const [suggest, setSuggest] = useState<string>('');
 
   useEffect(() => {
     const ctrl = new AbortController();
-    console.log('searching...', { q: query, account: selectedAccount, label: labelFilter });
+    console.log('searching...', { q: debouncedQuery, account: selectedAccount, label: labelFilter });
     setLoading(true);
     setSuggest('');
     api
-      .searchEmails({   q: query , account: selectedAccount , label: labelFilter, page, size })
+      .searchEmails({   q: debouncedQuery , account: selectedAccount , label: labelFilter, page, size })
       .then((r) => {
         setEmails(r.items);
         setTotal(r.total);
@@ -51,7 +53,7 @@ const [suggest, setSuggest] = useState<string>('');
       })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [query, selectedAccount, labelFilter, page, size,selectedId]);
+  }, [debouncedQuery, selectedAccount, labelFilter, page, size, selectedId]);
 
   const onSelectEmail = async (id: string) => {
     setSelectedId(id);
