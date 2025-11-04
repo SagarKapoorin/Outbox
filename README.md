@@ -33,3 +33,24 @@ Notes
 - First sync fetches last 30 days of emails; new mail arrives via IDLE events.
 - RAG suggested replies need MongoDB Atlas Vector Search enabled.
 
+MongoDB Vector Search Index
+- Create the Atlas Vector Search index for the `kbs` collection before using RAG. In the MongoDB shell, run:
+
+```
+db.kbs.createSearchIndex(
+  "kb_embedding_index",
+  "vectorSearch",
+  {
+    fields: [
+      {
+        type: "vector",
+        path: "embedding",
+        numDimensions: 1536,
+        similarity: "cosine"
+      }
+    ]
+  }
+)
+```
+
+Note: You can override the index name via `KB_VECTOR_INDEX` (defaults to `kb_embedding_index`).
