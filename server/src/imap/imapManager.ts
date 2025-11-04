@@ -111,12 +111,12 @@ export class ImapManager {
       if (label) {
         await EmailModel.updateOne({ id }, { $addToSet: { labels: label } });
         await es.update({ index: EMAIL_INDEX, id, doc: { labels: [label] } });
-        this.log.info({ id, label }, 'email labeled');
+        // this.log.info({ id, label }, 'email labeled');
         if (label === 'Interested') {
           try {
             await notifyInterested({ id, subject: doc.subject, from: doc.from });
             await triggerInterestedWebhook({ id, subject: doc.subject, from: doc.from });
-            this.log.info({ id }, 'interested notifications sent');
+            // this.log.info({ id }, 'interested notifications sent');
           } catch (notifyErr) {
             this.log.warn({ err: notifyErr as any, id }, 'notification failed');
           }
