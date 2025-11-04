@@ -38,12 +38,8 @@
       "request": { "method": "GET", "url": "http://localhost:{{port}}/accounts" }
     },
     {
-      "name": "Accounts Folders",
-      "request": { "method": "GET", "url": "http://localhost:{{port}}/accounts/folders" }
-    },
-    {
-      "name": "Emails Filter: Account+Folder+Label",
-      "request": { "method": "GET", "url": "{{baseUrl}}/emails?account=acc1&folder=INBOX&label=Interested" }
+      "name": "Emails Filter: Account+Label",
+      "request": { "method": "GET", "url": "{{baseUrl}}/emails?account=acc1&label=Interested" }
     },
     {
       "name": "Emails Filter: Date Range + Query",
